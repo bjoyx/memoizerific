@@ -1,15 +1,19 @@
 var MapOrSimilar = require('map-or-similar');
 
-module.exports = function (limit) {
+module.exports = function (limit, numArgsToCheck) {
 	var cache = new MapOrSimilar(process.env.FORCE_SIMILAR_INSTEAD_OF_MAP === 'true'),
 		lru = [];
 
 	return function (fn) {
 		var memoizerific = function () {
+			var argsLength = numArgsToCheck ?
+				numArgsToCheck :
+				arguments.length;
+
 			var currentCache = cache,
 				newMap,
 				fnResult,
-				argsLengthMinusOne = arguments.length - 1,
+				argsLengthMinusOne = argsLength - 1,
 				lruPath = Array(argsLengthMinusOne + 1),
 				isMemoized = true,
 				i;
