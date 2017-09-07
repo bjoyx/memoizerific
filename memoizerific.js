@@ -116,16 +116,20 @@ module.exports = Similar;
 },{}],3:[function(_dereq_,module,exports){
 var MapOrSimilar = _dereq_('map-or-similar');
 
-module.exports = function (limit) {
+module.exports = function (limit, numArgsToCheck) {
 	var cache = new MapOrSimilar(undefined === 'true'),
 		lru = [];
 
 	return function (fn) {
 		var memoizerific = function () {
+			var argsLength = numArgsToCheck ?
+				numArgsToCheck :
+				arguments.length;
+
 			var currentCache = cache,
 				newMap,
 				fnResult,
-				argsLengthMinusOne = arguments.length - 1,
+				argsLengthMinusOne = argsLength - 1,
 				lruPath = Array(argsLengthMinusOne + 1),
 				isMemoized = true,
 				i;
@@ -166,11 +170,13 @@ module.exports = function (limit) {
 				}
 			}
 
+			// if the result wasn't memoized, compute it and cache it
 			if (!isMemoized) {
 				fnResult = fn.apply(null, arguments);
 				currentCache.set(arguments[argsLengthMinusOne], fnResult);
 			}
 
+			// if there is a cache limit, purge any extra results
 			if (limit > 0) {
 				lruPath[argsLengthMinusOne] = {
 					cacheItem: currentCache,
